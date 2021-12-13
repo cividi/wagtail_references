@@ -3,10 +3,9 @@ from django.urls import reverse
 from django.utils.translation import ugettext as _
 from wagtail.admin.forms.search import SearchForm
 from wagtail.admin.modal_workflow import render_modal_workflow
-from wagtail.admin.utils import PermissionPolicyChecker
+from wagtail.admin.auth import PermissionPolicyChecker
 from wagtail.core import hooks
 from wagtail.core.models import Collection
-from wagtail.utils.pagination import paginate
 
 from wagtail_references import get_reference_model
 from wagtail_references.forms import ReferenceInsertionForm, get_reference_form
@@ -94,7 +93,6 @@ def chooser(request):
             is_searching = False
             q = None
 
-        paginator, images = paginate(request, references, per_page=50)
         return render(request, "wagtail_references/chooser/results.html", {
             'references': references,
             'is_searching': is_searching,
@@ -102,7 +100,6 @@ def chooser(request):
             'will_select_format': request.GET.get('select_format')
         })
     else:
-        paginator, images = paginate(request, references, per_page=50)
         context = get_chooser_context(request)
         context.update({
             'references': references,

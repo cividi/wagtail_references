@@ -5,10 +5,10 @@ from django.utils.translation import ugettext as _
 from django.views.decorators.vary import vary_on_headers
 from wagtail.admin import messages
 from wagtail.admin.forms.search import SearchForm
-from wagtail.admin.utils import PermissionPolicyChecker, permission_denied
+from wagtail.admin.auth import PermissionPolicyChecker, permission_denied
 from wagtail.core.models import Collection
 from wagtail.search import index as search_index
-from wagtail.utils.pagination import paginate
+from django.core.paginator import Paginator
 
 from wagtail_references import get_reference_model
 from wagtail_references.forms import get_reference_form
@@ -47,8 +47,9 @@ def index(request):
             references = references.filter(collection=current_collection)
         except (ValueError, Collection.DoesNotExist):
             pass
-
-    paginator, references = paginate(request, references)
+    
+    paginator = Paginator(references, per_page=25)
+    references = paginator.get_page(request.GET.get('p'))
 
     collections = permission_policy.collections_user_has_any_permission_for(
         request.user, ['add', 'change']
@@ -167,7 +168,8 @@ def add(request):
 def usage(request, image_id):
     reference = get_object_or_404(get_reference_model(), id=image_id)
 
-    paginator, used_by = paginate(request, reference.get_usage())
+    paginator = Paginator(reference.get_usage(), per_page=25)
+    used_by = paginator.get_page(request.GET.get('p'))
 
     return render(request, "wagtail_references/references/usage.html", {
         'reference': reference,
