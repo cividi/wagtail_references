@@ -15,7 +15,7 @@ from wagtail_references.forms import GroupReferencePermissionFormSet
 from wagtail_references.permissions import permission_policy
 
 from .richtext import (
-    SnippetRefHandler, reference_entity_decorator
+    ReferenceEntityElementHandler, reference_entity_decorator
 )
 
 
@@ -41,35 +41,35 @@ def register_images_menu_item():
     )
 
 
-@hooks.register("register_rich_text_features")
-def register_reference_feature(features):
-    feature_name = "set-reference"
-    type_ = "REFERENCE"
+@hooks.register('register_rich_text_features')
+def register_stock_feature(features):
+    features.default_features.append('stock')
+    """
+    Registering the `set-reference` feature, which uses the `REFERENCE` Draft.js entity type,
+    and is stored as HTML with a `<span data-reference>` tag.
+    """
+    feature_name = 'set-reference'
+    type_ = 'REFERENCE'
+
+    control = {
+        'type': type_,
+        'label': '$',
+        'description': 'Reference',
+    }
 
     features.register_editor_plugin(
-        "draftail",
-        feature_name,
-        draftail_features.EntityFeature(
-            {"type": type_, "icon": "openquote", "description": ugettext("Set Referenece")},
-            js=[
-                "wagtail_references/js/snippet-chooser-modal.js",
-            ],
-        ),
+        'draftail', feature_name, draftail_features.EntityFeature(
+            control,
+            js=['wagtail_references/reference-chooser.js'],
+            # css={'all': ['somethin.css']}
+        )
     )
 
-    features.register_converter_rule(
-        "contentstate",
-        feature_name, {
-            "from_database_format": {
-                "a[linktype='reference']": SnippetRefHandler(type_)
-            },
-            "to_database_format": {
-                "entity_decorators": {
-                    type_: reference_entity_decorator
-                }
-            },
-        }
-    )
+    features.register_converter_rule('contentstate', feature_name, {
+        # Note here that the conversion is more complicated than for blocks and inline styles.
+        'from_database_format': {'span[data-reference]': ReferenceEntityElementHandler(type_)},
+        'to_database_format': {'entity_decorators': {type_: reference_entity_decorator}},
+    })
 
 
 @hooks.register('insert_editor_js')
