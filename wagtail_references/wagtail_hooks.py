@@ -6,11 +6,17 @@ from django.utils.translation import ungettext
 from wagtail.admin.menu import MenuItem
 from wagtail.admin.search import SearchArea
 from wagtail.admin.site_summary import SummaryItem
+from wagtail.admin.rich_text.editors.draftail import features as draftail_features
 from wagtail.core import hooks
+from django.utils.translation import ugettext
 
 from wagtail_references import admin_urls, get_reference_model
 from wagtail_references.forms import GroupReferencePermissionFormSet
 from wagtail_references.permissions import permission_policy
+
+from .richtext import (
+    SnippetRefHandler, reference_entity_decorator
+)
 
 
 @hooks.register('register_admin_urls')
@@ -32,6 +38,37 @@ def register_images_menu_item():
     return ReferencesMenuItem(
         _('References'), reverse('wagtail_references:index'),
         name='references', classnames='icon icon-list-ol', order=300
+    )
+
+
+@hooks.register("register_rich_text_features")
+def register_reference_feature(features):
+    feature_name = "set-reference"
+    type_ = "REFERENCE"
+
+    features.register_editor_plugin(
+        "draftail",
+        feature_name,
+        draftail_features.EntityFeature(
+            {"type": type_, "icon": "openquote", "description": ugettext("Set Referenece")},
+            js=[
+                "wagtail_references/js/snippet-chooser-modal.js",
+            ],
+        ),
+    )
+
+    features.register_converter_rule(
+        "contentstate",
+        feature_name, {
+            "from_database_format": {
+                "a[linktype='reference']": SnippetRefHandler(type_)
+            },
+            "to_database_format": {
+                "entity_decorators": {
+                    type_: reference_entity_decorator
+                }
+            },
+        }
     )
 
 
