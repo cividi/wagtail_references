@@ -15,7 +15,8 @@ from wagtail_references.forms import GroupReferencePermissionFormSet
 from wagtail_references.permissions import permission_policy
 
 from .richtext import (
-    ReferenceEntityElementHandler, reference_entity_decorator
+    ReferenceLinkHandler, ReferenceEntityElementHandler,
+    reference_entity_decorator
 )
 
 
@@ -37,39 +38,52 @@ class ReferencesMenuItem(MenuItem):
 def register_images_menu_item():
     return ReferencesMenuItem(
         _('References'), reverse('wagtail_references:index'),
-        name='references', classnames='icon icon-list-ol', order=300
+        name='references', classnames='icon icon-openquote', order=300
     )
 
 
 @hooks.register('register_rich_text_features')
-def register_stock_feature(features):
-    features.default_features.append('stock')
+def register_reference_feature(features):
     """
-    Registering the `set-reference` feature, which uses the `REFERENCE` Draft.js entity type,
+    Registering the `reference-link` feature, which uses the `REFERENCE` Draft.js entity type,
     and is stored as HTML with a `<span data-reference>` tag.
     """
-    feature_name = 'set-reference'
+    feature_name = 'reference-link'
     type_ = 'REFERENCE'
+
+    features.register_link_type(ReferenceLinkHandler)
 
     control = {
         'type': type_,
-        'label': '$',
-        'description': 'Reference',
+        'icon': 'openquote',
+        'description': 'BibTeX Reference',
     }
 
+    features.default_features.append(feature_name)
+
+    # define a draftail plugin to use when the 'embed' feature is active
     features.register_editor_plugin(
         'draftail', feature_name, draftail_features.EntityFeature(
             control,
-            js=['wagtail_references/reference-chooser.js'],
+            js=[
+                'https://cdn.jsdelivr.net/npm/citation-js',
+                'wagtail_references/reference-chooser.js',
+                'wagtail_references/reference-modal.js',
+            ],
             # css={'all': ['somethin.css']}
         )
     )
 
+    # define how to convert between contentstate's representation of embeds and
+    # the database representation-
     features.register_converter_rule('contentstate', feature_name, {
         # Note here that the conversion is more complicated than for blocks and inline styles.
-        'from_database_format': {'span[data-reference]': ReferenceEntityElementHandler(type_)},
+        'from_database_format': {'a[linktype="reference"]': ReferenceEntityElementHandler(type_)},
         'to_database_format': {'entity_decorators': {type_: reference_entity_decorator}},
     })
+
+    # add 'embed' to the set of on-by-default rich text features
+    features.default_features.append('embed')
 
 
 @hooks.register('insert_editor_js')
@@ -80,7 +94,7 @@ def editor_js():
             window.chooserUrls.referenceChooser = '{0}';
         </script>
         """,
-        reverse('wagtail_references:chooser')
+        reverse('wagtailreferences:chooser')
     )
 
 
@@ -116,7 +130,7 @@ def register_references_search_area():
     return ReferencesSearchArea(
         _('References'), reverse('wagtail_references:index'),
         name='references',
-        classnames='icon icon-list-ol',
+        classnames='icon icon-openquote',
         order=200)
 
 

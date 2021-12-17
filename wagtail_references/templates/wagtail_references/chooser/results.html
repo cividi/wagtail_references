@@ -13,15 +13,36 @@
         <h2>{% trans "Latest references" %}</h2>
     {% endif %}
 
-    <ul class="listing horiz references chooser">
-        {% for reference in references %}
-            <li>
-                <a class="image-choice" title="{% if collections %}{{ reference.collection.name }} » {% endif %}{{ reference.slug }}" href="{% if will_select_format %}{% url 'wagtailreferences:chooser_select_format' reference.id %}{% else %}{% url 'wagtailreferences:reference_chosen' reference.id %}{% endif %}">
-                    <h3>{{ reference.slug|ellipsistrim:60 }}</h3>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    <table class="listing horiz references chooser">
+        <thead>
+            <tr class="table-headers">
+                <th><strong>Type</strong></th>
+                <th><strong>Slug (citation key):</strong></th>
+                <th>Preview</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reference in references %}
+                <tr class="reference">
+                    <td>
+                        <a class="reference-choice" title="{% if collections %}{{ reference.collection.name }} » {% endif %}{{ reference.slug }}" href="{% if will_select_format %}{% url 'wagtailreferences:chooser_select_format' reference.id %}{% else %}{% url 'wagtailreferences:reference_chosen' reference.id %}{% endif %}">
+                            {{ reference.bibtype }}
+                        </a>
+                    </td>
+                    <td>
+                        <a class="reference-choice" title="{% if collections %}{{ reference.collection.name }} » {% endif %}{{ reference.slug }}" href="{% if will_select_format %}{% url 'wagtailreferences:chooser_select_format' reference.id %}{% else %}{% url 'wagtailreferences:reference_chosen' reference.id %}{% endif %}">
+                            {{ reference.slug }}
+                        </a>
+                    </td>
+                    <td>
+                        <a class="reference-choice" title="{% if collections %}{{ reference.collection.name }} » {% endif %}{{ reference.slug }}" href="{% if will_select_format %}{% url 'wagtailreferences:chooser_select_format' reference.id %}{% else %}{% url 'wagtailreferences:reference_chosen' reference.id %}{% endif %}">
+                            <div id="{{ reference.slug }}" class="preview" data="{{ reference.bibtex_string }}"></div>
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}  
+        </tbody>
+    </table>
 
     {% include "wagtailadmin/shared/pagination_nav.html" with items=references is_ajax=1 %}
 {% endif %}

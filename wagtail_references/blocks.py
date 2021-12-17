@@ -19,4 +19,4 @@ class ReferenceChooserBlock(SnippetChooserBlock):
     #         return ''
 
     class Meta:
-        icon = "list-ol"
+        icon = "openquote"

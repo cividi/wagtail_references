@@ -1,53 +1,94 @@
-const React = window.React;
-const Modifier = window.DraftJS.Modifier;
-const EditorState = window.DraftJS.EditorState;
+var REFERENCE_CHOOSER_MODAL_ONLOAD_HANDLERS = {
+    chooser: function(modal, jsonData) {
+        const Cite = require('citation-js')
+        function renderCite(context) {
+            $('a div.preview', context).html(function() {
+                const citation = new Cite(this.attributes.data.value)
+                const outputHtml = citation.format('bibliography', {
+                    format: 'html',
+                    template: 'apa',
+                    lang: 'en-US'
+                })
+                return outputHtml;
+            });
+        }
 
-const DEMO_STOCKS = ['AMD', 'AAPL', 'TWTR', 'TSLA', 'BTC'];
+        var searchUrl = $('form.reference-search', modal.body).attr('action');
 
-// Not a real React component – just creates the entities as soon as it is rendered.
-class ReferenceSource extends React.Component {
-    componentDidMount() {
-        const { editorState, entityType, onComplete } = this.props;
+        var currentTag;
 
-        const content = editorState.getCurrentContent();
-        const selection = editorState.getSelection();
+        function ajaxifyLinks(context) {
+            $('.listing a', context).click(function() {
+                modal.loadUrl(this.href);
+                return false;
+            });
 
-        const randomStock = DEMO_STOCKS[Math.floor(Math.random() * DEMO_STOCKS.length)];
+            $('.pagination a', context).click(function() {
+                var page = this.getAttribute('data-page');
+                setPage(page);
+                return false;
+            });
+        }
 
-        // Uses the Draft.js API to create a new entity with the right data.
-        const contentWithEntity = content.createEntity(entityType.type, 'IMMUTABLE', {
-            reference: randomStock,
+        function fetchResults(requestData) {
+            $.ajax({
+                url: searchUrl,
+                data: requestData,
+                success: function(data, status) {
+                    $('#image-results').html(data);
+                    ajaxifyLinks($('#image-results'));
+                }
+            });
+        }
+
+        function search() {
+            /* Searching causes currentTag to be cleared - otherwise there's
+            no way to de-select a tag */
+            currentTag = null;
+            fetchResults({
+                q: $('#id_q').val(),
+                collection_id: $('#collection_chooser_collection_id').val()
+            });
+            return false;
+        }
+
+        function setPage(page) {
+            var params = { p: page };
+            if ($('#id_q').val().length) {
+                params['q'] = $('#id_q').val();
+            }
+            if (currentTag) {
+                params['tag'] = currentTag;
+            }
+            params['collection_id'] = $('#collection_chooser_collection_id').val();
+            fetchResults(params);
+            return false;
+        }
+
+        ajaxifyLinks(modal.body);
+        renderCite(modal.body);
+
+        $('form.reference-search', modal.body).submit(search);
+
+        $('#id_q').on('input', function() {
+            clearTimeout($.data(this, 'timer'));
+            var wait = setTimeout(search, 200);
+            $(this).data('timer', wait);
         });
-        const entityKey = contentWithEntity.getLastCreatedEntityKey();
+        $('#collection_chooser_collection_id').change(search);
+        $('a.suggested-tag').click(function() {
+            currentTag = $(this).text();
+            $('#id_q').val('');
+            fetchResults({
+                tag: currentTag,
+                collection_id: $('#collection_chooser_collection_id').val()
+            });
+            return false;
+        });
+    },
 
-        // We also add some text for the entity to be activated on.
-        const text = `$${randomStock}`;
-
-        const newContent = Modifier.replaceText(content, selection, text, null, entityKey);
-        const nextState = EditorState.push(editorState, newContent, 'insert-characters');
-
-        onComplete(nextState);
-    }
-
-    render() {
-        return null;
-    }
-}
-
-const Reference = (props) => {
-    const { entityKey, contentState } = props;
-    const data = contentState.getEntity(entityKey).getData();
-
-    return React.createElement('a', {
-        role: 'button',
-        onMouseUp: () => {
-            window.open(`https://finance.yahoo.com/quote/${data.reference}`);
-        },
-    }, props.children);
+    reference_chosen: function(modal, jsonData) {
+        modal.respond('referenceChosen', jsonData['result']);
+        modal.close();
+    },
 };
-
-window.draftail.registerPlugin({
-    type: 'REFERENCE',
-    source: ReferenceSource,
-    decorator: Reference,
-});

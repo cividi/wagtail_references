@@ -11,7 +11,7 @@
 
 {% block content %}
     {% trans "Editing" as editing_str %}
-    {% include "wagtailadmin/shared/header.html" with title=editing_str subtitle=reference.slug icon="list-ol" %}
+    {% include "wagtailadmin/shared/header.html" with title=editing_str subtitle=reference.slug icon="openquote" %}
 
     <form action="{% url 'wagtailreferences:edit' reference.id %}" method="POST" enctype="multipart/form-data" novalidate>
         {% csrf_token %}

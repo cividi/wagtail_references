@@ -1,5 +1,4 @@
 import bibtexparser
-import jsonfield
 import logging
 import re
 from django.conf import settings
@@ -36,7 +35,7 @@ class AbstractReference(ClusterableModel, CollectionMember, Orderable, index.Ind
     bibtex = models.TextField(help_text=_('The reference, in bibtex format.'))
     bibtype = models.CharField(max_length=255, verbose_name=_('Bibliography entry type'), default='article', help_text=_('The entry type, detected from the BibTeX entry.'))
     created_at = models.DateTimeField(verbose_name=_('created at'), auto_now_add=True, db_index=True)
-    bibjson = jsonfield.JSONField()
+    bibjson = models.JSONField()
     created_by_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_('created by user'),
         null=True, blank=True, editable=False, on_delete=models.SET_NULL

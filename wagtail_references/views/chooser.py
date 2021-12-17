@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import ugettext as _
@@ -106,7 +108,8 @@ def chooser(request):
             'uploadform': uploadform,
         })
         return render_modal_workflow(
-            request, 'wagtail_references/chooser/chooser.html', None, context
+            request, 'wagtail_references/chooser/chooser.html', None, context,
+            json_data=get_chooser_js_data()
         )
 
 

@@ -4,7 +4,7 @@
 
 {% block content %}
     {% trans "Add reference" as add_str %}
-    {% include "wagtailadmin/shared/header.html" with title=add_str icon="list-ol" %}
+    {% include "wagtailadmin/shared/header.html" with title=add_str icon="openquote" %}
 
     <div class="nice-padding">
         <form action="{% url 'wagtailreferences:add' %}" method="POST" enctype="multipart/form-data" novalidate>
