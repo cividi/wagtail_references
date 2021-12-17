@@ -12,11 +12,13 @@ def reference_entity_decorator(props):
     Draft.js ContentState to database HTML.
     Converts the REFERENCE entities into a span tag.
     """
+    fragment = props.get("fragment")
+    
     return DOM.create_element('a', {
         "linktype": "reference",
-        "id": props.get("id"),
-        "data-string": props.get("string"),
-        "data-edit-link": props.get("edit_link"),
+        "id": fragment.get("id"),
+        "data-slug": fragment.get("slug"),
+        "data-bibtex": fragment.get("preview").get("bibtex"),
     }, props['children'])
 
 class ReferenceLinkHandler(LinkHandler):
@@ -52,7 +54,9 @@ class ReferenceEntityElementHandler(LinkElementHandler):
         Take the ``reference`` value from the ``data-reference`` HTML attribute.
         """
         return {
-            "id": attrs.get("id"),
-            "string": attrs.get("data-string"),
-            "edit_link": attrs.get("data-edit-link"),
+            "fragment": {
+                "id": attrs.get("id"),
+                "slug": attrs.get("data-slug"),
+                "preview": { "bibtex": attrs.get("data-bibtex")},
+            }
         }
