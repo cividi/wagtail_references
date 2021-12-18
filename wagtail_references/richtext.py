@@ -16,9 +16,8 @@ def reference_entity_decorator(props):
     
     return DOM.create_element('a', {
         "linktype": "reference",
-        "id": fragment.get("id"),
+        "data-id": fragment.get("id"),
         "data-slug": fragment.get("slug"),
-        "data-bibtex": fragment.get("preview").get("bibtex"),
     }, props['children'])
 
 class ReferenceLinkHandler(LinkHandler):
@@ -55,8 +54,7 @@ class ReferenceEntityElementHandler(LinkElementHandler):
         """
         return {
             "fragment": {
-                "id": attrs.get("id"),
+                "id": attrs.get("data-id"),
                 "slug": attrs.get("data-slug"),
-                "preview": { "bibtex": attrs.get("data-bibtex")},
             }
         }
