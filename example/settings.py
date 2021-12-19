@@ -59,6 +59,9 @@ INSTALLED_APPS = [
 
     'taggit',
 
+    "grapple",
+    "graphene_django",
+
     # app specific
     'wagtail_references',
     'example',
@@ -167,6 +170,11 @@ WAGTAILSEARCH_BACKENDS = {
         'BACKEND': 'wagtail.search.backends.database',
     }
 }
+
+# ======== GRAPPLE CONFIGURATION
+GRAPHENE = { "SCHEMA": "grapple.schema.schema" }
+GRAPPLE = { "APPS": ["example","wagtail_references"], "EXPOSE_GRAPHIQL": True}
+# ======== END GRAPPLE CONFIGURATION
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash

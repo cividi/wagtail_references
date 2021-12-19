@@ -68,7 +68,9 @@ class AbstractReference(ClusterableModel, CollectionMember, Orderable, index.Ind
 
 
 @register_snippet
-@register_query_field('reference','references')
+@register_query_field('reference', 'references', {
+    "slug": graphene.String(),
+})
 class Reference(AbstractReference):
 
     # Note slug field is added into the edit form only, not for creation
@@ -76,6 +78,15 @@ class Reference(AbstractReference):
         'bibtex',
         'collection',
     )
+
+    graphql_fields = [
+        GraphQLString("slug"),
+        GraphQLString("bibtex"),
+        GraphQLString("bibtex_string"),
+        GraphQLString("bibjson"),
+        GraphQLString("created_at"),
+        GraphQLString("bibtype"),
+    ]
 
     class Meta:
         verbose_name = _('BibTeX Reference')
