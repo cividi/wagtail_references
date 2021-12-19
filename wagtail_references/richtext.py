@@ -23,10 +23,13 @@ def reference_entity_decorator(props):
 class ReferenceLinkHandler(LinkHandler):
     identifier = "reference"
 
+    @staticmethod
+    def get_model():
+        return get_reference_model()
     @classmethod
     def get_instance(cls, attrs):
-        model = get_reference_model()
-        return model.objects.get(id=attrs["id"])
+        model = cls.get_model()
+        return model.objects.get(id=attrs["data-id"])
 
     @classmethod
     def get_template(cls, attrs):
@@ -38,7 +41,7 @@ class ReferenceLinkHandler(LinkHandler):
             reference_obj = cls.get_instance(attrs)
             template = cls.get_template(attrs)
             return render_to_string(template, {"object": reference_obj})
-        except Exception:
+        except Exception as e:
             return "<a>"
 
 class ReferenceEntityElementHandler(LinkElementHandler):
