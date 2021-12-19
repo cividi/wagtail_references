@@ -16,6 +16,11 @@ from bibtexparser.bwriter import BibTexWriter
 from bibtexparser.customization import homogenize_latex_encoding, convert_to_unicode, author, type
 from wagtail_references.bibjson import record_from_entry
 
+from grapple.helpers import register_query_field
+from grapple.models import (
+    GraphQLString,
+)
+import graphene
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +68,7 @@ class AbstractReference(ClusterableModel, CollectionMember, Orderable, index.Ind
 
 
 @register_snippet
+@register_query_field('reference','references')
 class Reference(AbstractReference):
 
     # Note slug field is added into the edit form only, not for creation
