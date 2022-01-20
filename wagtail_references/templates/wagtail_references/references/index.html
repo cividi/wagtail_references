@@ -23,14 +23,12 @@
 {% block content %}
     {% trans "References" as ref_str %}
 
-    <!-- {% if user_can_add %} -->
-    {% trans "Add a reference" as add_ref_str %}
-    {% include "wagtailadmin/shared/header.html" with title=ref_str add_link="wagtailreferences:add" icon="openquote" add_text=add_ref_str search_url="wagtailreferences:index" %}
-    <!-- {% else %}
+    {% if user_can_add %}
+        {% trans "Add a reference" as add_ref_str %}
+        {% include "wagtailadmin/shared/header.html" with title=ref_str add_link="wagtailreferences:add" icon="openquote" add_text=add_ref_str search_url="wagtailreferences:index" %}
+    {% else %}
         {% include "wagtailadmin/shared/header.html" with title=ref_str icon="openquote" search_url="wagtailreferences:index" %}
-    {% endif %} -->
-
-    Test
+    {% endif %}
 
     <div class="nice-padding">
         {% if collections %}
